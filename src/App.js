@@ -1,59 +1,40 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 const ThemeContext = React.createContext('light');
 
 function higherOrderComponent(Component) {
-  return function HoComponentn(props) {
+  return props => {
     return (
       <ThemeContext.Consumer>
         {theme => <Component {...props} theme={theme} />}
       </ThemeContext.Consumer>
     );
-  }
+  };
 }
-
-/*
-function ThemeButton(props) {
-  const t = (theme) => <Button {...props} theme={theme} />;
-  return (
-    <ThemeContext.Consumer>
-      {t}
-    </ThemeContext.Consumer>
-  );
-}
-*/
 
 function Button(props) {
+  console.log(props);
   const buttonName = props.theme === 'light' ? 'light' : props.theme;
   const handleClick = () => {
-    alert('aaa');
-  }
-  return (
-    <button onClick={handleClick}>{buttonName}</button>
-  );
+    alert(props.theme);
+  };
+  return <button onClick={handleClick}>{buttonName}</button>;
 }
 
 const ThemeButton = higherOrderComponent(Button);
 
 function Toolbar(props) {
-  return (
-    <div>
-      <ThemeButton />
-    </div>
-  );
+  return <ThemeButton />;
 }
-
-
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: 'dark',
-    }
-    this.handle = this.handle.bind(this);
+      theme: 'dark',
+    };
+    this.handleClick = this.handleClick.bind(this);
     this.AAA = 'AAA';
   }
 
@@ -62,7 +43,7 @@ class App extends Component {
     if (typeof action.type === 'undefined') {
       throw new Error('Actions may not have an undefined "type" property.');
     }
-    currentState = reducer(preloadState, action);
+    // currentState = this.reducer(preloadState, action);
     this.setState();
     return action;
   }
@@ -79,23 +60,29 @@ class App extends Component {
     }
   }
 
-  // Actions
+  // ActionCreator
   aaa() {
+    // Action
     return {
       type: this.AAA,
       payload: 'aaa',
-    }
+    };
   }
 
   handleClick() {
-    this.dispatch(aaa());
+    this.dispatch(this.aaa());
   }
 
   render() {
+    const Fragment = React.Fragment;
     return (
-      <ThemeContext.Provider value={this.state.value}>
+      <Fragment>
+        <ThemeContext.Provider value={this.state.theme}>
+          <Toolbar />
+        </ThemeContext.Provider>
+        {/** Default Value is used */}
         <Toolbar />
-      </ThemeContext.Provider>
+      </Fragment>
     );
   }
 }
