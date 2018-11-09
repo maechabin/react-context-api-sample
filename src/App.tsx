@@ -1,10 +1,23 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import './App.css';
+
+interface Context {
+  theme: string;
+}
+
+interface Action {
+  type: ActionType;
+  payload: string;
+}
+
+enum ActionType {
+  AAA = 'AAA',
+}
 
 const ThemeContext = React.createContext('light');
 
-function higherOrderComponent(Component) {
-  return props => {
+function higherOrderComponent(Component: React.SFC<Context>) {
+  return (props: any): JSX.Element => {
     return (
       <ThemeContext.Consumer>
         {theme => <Component {...props} theme={theme} />}
@@ -13,47 +26,48 @@ function higherOrderComponent(Component) {
   };
 }
 
-function Button(props) {
+function Button(props: Context): JSX.Element {
   console.log(props);
-  const handleClick = () => {
-    alert(props.theme);
+  const { theme } = props;
+  const handleClick = (): void => {
+    alert(theme);
   };
-  return <button onClick={handleClick}>{props.theme}</button>;
+  return <button onClick={handleClick}>{theme}</button>;
 }
 
 const ThemeButton = higherOrderComponent(Button);
 
-class ThemeButton2 extends React.Component {
+class ThemeButton2 extends React.Component<any, any> {
+  context: string = '';
   static contextType = ThemeContext;
-  render() {
+  render(): JSX.Element {
     return <Button theme={this.context} />;
   }
 }
 
-class App extends Component {
-  constructor(props) {
+class App extends React.Component<any, Context> {
+  constructor(props: any) {
     super(props);
     this.state = {
       theme: 'dark',
     };
     this.handleClick = this.handleClick.bind(this);
-    this.AAA = 'AAA';
   }
 
   // Dispatcher
-  dispatch(action) {
+  dispatch(action: Action): Action {
     if (typeof action.type === 'undefined') {
       throw new Error('Actions may not have an undefined "type" property.');
     }
     // currentState = this.reducer(preloadState, action);
-    this.setState();
+    // this.setState();
     return action;
   }
 
   // Reducer: 受け取ったActionを元にStateを更新
-  reducer(state, action) {
+  reducer(state: Context, action: Action): Context {
     switch (action.type) {
-      case 'success':
+      case ActionType.AAA:
         return Object.assign({}, state, {
           value: action.payload,
         });
@@ -63,19 +77,19 @@ class App extends Component {
   }
 
   // ActionCreator
-  aaa() {
+  aaa(): Action {
     // Action
     return {
-      type: this.AAA,
+      type: ActionType.AAA,
       payload: 'aaa',
     };
   }
 
-  handleClick() {
+  handleClick(): void {
     this.dispatch(this.aaa());
   }
 
-  render() {
+  render(): JSX.Element {
     const Fragment = React.Fragment;
     return (
       <Fragment>
