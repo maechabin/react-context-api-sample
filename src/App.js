@@ -15,17 +15,19 @@ function higherOrderComponent(Component) {
 
 function Button(props) {
   console.log(props);
-  const buttonName = props.theme === 'light' ? 'light' : props.theme;
   const handleClick = () => {
     alert(props.theme);
   };
-  return <button onClick={handleClick}>{buttonName}</button>;
+  return <button onClick={handleClick}>{props.theme}</button>;
 }
 
 const ThemeButton = higherOrderComponent(Button);
 
-function Toolbar(props) {
-  return <ThemeButton />;
+class ThemeButton2 extends React.Component {
+  static contextType = ThemeContext;
+  render() {
+    return <Button theme={this.context} />;
+  }
 }
 
 class App extends Component {
@@ -77,11 +79,14 @@ class App extends Component {
     const Fragment = React.Fragment;
     return (
       <Fragment>
+        {/** this.state.theme is used as value */}
         <ThemeContext.Provider value={this.state.theme}>
-          <Toolbar />
+          <ThemeButton />
         </ThemeContext.Provider>
-        {/** Default Value is used */}
-        <Toolbar />
+        {/** Default Value is used as value */}
+        <ThemeButton />
+        {/** ContextType is used as value */}
+        <ThemeButton2 />
       </Fragment>
     );
   }
