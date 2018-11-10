@@ -2,6 +2,11 @@ import * as React from 'react';
 import './App.css';
 
 interface Context {
+  state: State;
+  aaa: () => void;
+}
+
+interface State {
   theme: string;
 }
 
@@ -14,9 +19,16 @@ enum ActionType {
   AAA = 'AAA',
 }
 
-const ThemeContext = React.createContext('light');
+const ThemeContext = React.createContext({
+  state: {
+    theme: 'linght',
+  },
+  aaa: (): void => {
+    alert('aaa');
+  },
+});
 
-function higherOrderComponent(Component: React.SFC<Context>) {
+function higherOrderComponent(Component: React.SFC<{ theme: Context }>) {
   return (props: any): JSX.Element => {
     return (
       <ThemeContext.Consumer>
@@ -26,26 +38,26 @@ function higherOrderComponent(Component: React.SFC<Context>) {
   };
 }
 
-function Button(props: Context): JSX.Element {
+function Button(props: { theme: Context }): JSX.Element {
   console.log(props);
-  const { theme } = props;
+  const { state, aaa } = props.theme;
   const handleClick = (): void => {
-    alert(theme);
+    aaa();
   };
-  return <button onClick={handleClick}>{theme}</button>;
+  return <button onClick={handleClick}>{state.theme}</button>;
 }
 
 const ThemeButton = higherOrderComponent(Button);
 
 class ThemeButton2 extends React.Component<any, any> {
-  context: string = '';
+  context = {} as Context;
   static contextType = ThemeContext;
   render(): JSX.Element {
     return <Button theme={this.context} />;
   }
 }
 
-class App extends React.Component<any, Context> {
+class App extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -59,18 +71,21 @@ class App extends React.Component<any, Context> {
     if (typeof action.type === 'undefined') {
       throw new Error('Actions may not have an undefined "type" property.');
     }
-    // currentState = this.reducer(preloadState, action);
-    // this.setState();
+    const nextState: State = this.reducer(this.state, action);
+    this.setState(() => ({
+      theme: nextState.theme,
+    }));
     return action;
   }
 
-  // Reducer: 受け取ったActionを元にStateを更新
-  reducer(state: Context, action: Action): Context {
+  // Reducer
+  reducer(state: State, action: Action): State {
     switch (action.type) {
       case ActionType.AAA:
-        return Object.assign({}, state, {
-          value: action.payload,
-        });
+        return {
+          ...state,
+          theme: action.payload,
+        };
       default:
         return state;
     }
@@ -94,13 +109,20 @@ class App extends React.Component<any, Context> {
     return (
       <Fragment>
         {/** this.state.theme is used as value */}
-        <ThemeContext.Provider value={this.state.theme}>
+        <ThemeContext.Provider
+          value={{
+            state: this.state,
+            aaa: this.handleClick,
+          }}
+        >
           <ThemeButton />
         </ThemeContext.Provider>
         {/** Default Value is used as value */}
         <ThemeButton />
         {/** ContextType is used as value */}
         <ThemeButton2 />
+
+        <p>theme: {this.state.theme}</p>
       </Fragment>
     );
   }
